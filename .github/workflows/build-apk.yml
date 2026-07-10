@@ -12,28 +12,29 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 24  # Naikin ke 24 biar ga deprecation warning
+          node-version: 24
 
       - uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '17'
+          java-version: '21'  # NAEKIN KE 21
 
       - uses: android-actions/setup-android@v3
 
       - name: Decode env from secret
         run: echo "${{ secrets.FIREBASE_ENV_BASE64 }}" | base64 -d > .env
 
-      - run: npm install  # pake install biar ga butuh lock file
-
+      - run: npm install
       - run: npm run build
 
-      - name: Add Android platform
-        run: npx cap add android || npx cap sync android
-
+      - run: npx cap add android || npx cap sync android
       - run: npx cap sync android
 
-      - run: cd android && ./gradlew assembleDebug
+      - name: Set gradle java version
+        run: |
+          echo "org.gradle.java.home=$JAVA_HOME" >> android/gradle.properties
+
+      - run: cd android && ./gradlew assembleDebug --no-daemon
 
       - uses: actions/upload-artifact@v4
         with:
