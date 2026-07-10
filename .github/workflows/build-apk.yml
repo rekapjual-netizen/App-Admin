@@ -12,8 +12,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: 'npm'
+          node-version: 24  # Naikin ke 24 biar ga deprecation warning
 
       - uses: actions/setup-java@v4
         with:
@@ -25,20 +24,18 @@ jobs:
       - name: Decode env from secret
         run: echo "${{ secrets.FIREBASE_ENV_BASE64 }}" | base64 -d > .env
 
-      - run: npm install
+      - run: npm install  # pake install biar ga butuh lock file
+
       - run: npm run build
 
       - name: Add Android platform
         run: npx cap add android || npx cap sync android
 
-      - name: Sync to Android
-        run: npx cap sync android
+      - run: npx cap sync android
 
-      - name: Build Debug APK
-        run: cd android && ./gradlew assembleDebug
+      - run: cd android && ./gradlew assembleDebug
 
-      - name: Upload APK artifact
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
           name: app-debug
           path: android/app/build/outputs/apk/debug/app-debug.apk
